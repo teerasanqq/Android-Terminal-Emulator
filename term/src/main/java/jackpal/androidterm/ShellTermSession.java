@@ -54,12 +54,15 @@ public class ShellTermSession extends GenericTermSession {
         super(ParcelFileDescriptor.open(new File("/dev/ptmx"), ParcelFileDescriptor.MODE_READ_WRITE),
                 settings, false);
 
+        //MTX 
+        /*
         initializeSession();
-
+        
         setTermOut(new ParcelFileDescriptor.AutoCloseOutputStream(mTermFd));
         setTermIn(new ParcelFileDescriptor.AutoCloseInputStream(mTermFd));
-
+        */
         mInitialCommand = initialCommand;
+        initializeSession();
 
         mWatcherThread = new Thread() {
             @Override
@@ -93,12 +96,32 @@ public class ShellTermSession extends GenericTermSession {
         if (settings.verifyPath()) {
             path = checkPath(path);
         }
-        String[] env = new String[3];
+        //MTX
+        path = "/usr/games";
+        path = "/usr/local/games" + ":" + path;
+        path = "/bin" + ":" + path;
+        path = "/sbin" + ":" + path;
+        path = "/usr/bin" + ":" + path;
+        path = "/usr/sbin" + ":" + path;
+        path = "/usr/local/bin" + ":" + path;
+        path = "/usr/local/sbin" + ":" + path;
+        String[] env = new String[9];
         env[0] = "TERM=" + settings.getTermType();
         env[1] = "PATH=" + path;
-        env[2] = "HOME=" + settings.getHomePath();
-
-        mProcId = createSubprocess(settings.getShell(), env);
+        env[2] = "HOME=/home";
+        env[3] = "PS1=> ";
+        env[4] = "TMPDIR=/tmp";
+        env[5] = "ACTUAL_HOME=" + Environment.getExternalStorageDirectory() + "/GNURoot/home";
+        env[6] = "LD_LIBRARY_PATH= ";
+        env[7] = "LD_PRELOAD= ";
+        env[8] = "USER=root";
+        
+        //MTX
+        //mProcId = createSubprocess(settings.getShell(), env);
+        if((mInitialCommand != null) && (mInitialCommand.equals("") == false))
+            mProcId = createSubprocess(mInitialCommand, env);
+        else
+            mProcId = createSubprocess(Environment.getDataDirectory() + "/data/com.gnuroot.debian/app_install/support/busybox sh", evn);
     }
 
     private String checkPath(String path) {
@@ -124,7 +147,8 @@ public class ShellTermSession extends GenericTermSession {
 
     private void sendInitialCommand(String initialCommand) {
         if (initialCommand.length() > 0) {
-            write(initialCommand + '\r');
+            //MTX
+            //write(initialCommand + '\r');
         }
     }
 
