@@ -54,7 +54,7 @@ public class ShellTermSession extends GenericTermSession {
         super(ParcelFileDescriptor.open(new File("/dev/ptmx"), ParcelFileDescriptor.MODE_READ_WRITE),
                 settings, false);
 
-        //MTX 
+        //CCX switched  initializeSession and mInitialCommand execution order
         /*
         initializeSession();
         
@@ -63,6 +63,9 @@ public class ShellTermSession extends GenericTermSession {
         */
         mInitialCommand = initialCommand;
         initializeSession();
+
+        setTermOut(new ParcelFileDescriptor.AutoCloseOutputStream(mTermFd));
+        setTermIn(new ParcelFileDescriptor.AutoCloseInputStream(mTermFd));
 
         mWatcherThread = new Thread() {
             @Override
@@ -96,7 +99,7 @@ public class ShellTermSession extends GenericTermSession {
         if (settings.verifyPath()) {
             path = checkPath(path);
         }
-        //MTX
+        //CCX added GNURoot specific paths
         path = "/usr/games";
         path = "/usr/local/games" + ":" + path;
         path = "/bin" + ":" + path;
@@ -116,7 +119,7 @@ public class ShellTermSession extends GenericTermSession {
         env[7] = "LD_PRELOAD= ";
         env[8] = "USER=root";
         
-        //MTX
+        //CCX
         //mProcId = createSubprocess(settings.getShell(), env);
         if((mInitialCommand != null) && (mInitialCommand.equals("") == false))
             mProcId = createSubprocess(mInitialCommand, env);
@@ -147,7 +150,7 @@ public class ShellTermSession extends GenericTermSession {
 
     private void sendInitialCommand(String initialCommand) {
         if (initialCommand.length() > 0) {
-            //MTX
+            //CCX
             //write(initialCommand + '\r');
         }
     }

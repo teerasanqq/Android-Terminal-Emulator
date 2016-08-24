@@ -118,6 +118,8 @@ public class Term extends Activity implements UpdateCallback, SharedPreferences.
 
     private boolean mBackKeyPressed;
 
+    private FileObserver mObserver;
+
     private static final String ACTION_PATH_BROADCAST = "jackpal.androidterm.broadcast.APPEND_TO_PATH";
     private static final String ACTION_PATH_PREPEND_BROADCAST = "jackpal.androidterm.broadcast.PREPEND_TO_PATH";
     private static final String PERMISSION_PATH_BROADCAST = "jackpal.androidterm.permission.APPEND_TO_PATH";
@@ -382,6 +384,9 @@ public class Term extends Activity implements UpdateCallback, SharedPreferences.
             wifiLockMode = WIFI_MODE_FULL_HIGH_PERF;
         }
         mWifiLock = wm.createWifiLock(wifiLockMode, TermDebug.LOG_TAG);
+        //CCX added acquire statements
+        mWakeLock.acquire();
+        mWifiLock.acquire();
 
         ActionBarCompat actionBar = ActivityCompat.getActionBar(this);
         if (actionBar != null) {
@@ -397,7 +402,55 @@ public class Term extends Activity implements UpdateCallback, SharedPreferences.
 
         updatePrefs();
         mAlreadyStarted = true;
+
+        //CCX added this observer. declares it as well as does all work with it.
+        mObserver = new FileObserver(Environment.getExternalStorageDirectory() + "/GNURoot/intents") { // set up a file observer to watch this directory on sd card
+
+            @Override
+            public void onEvent(int event, String file) {
+                if (event == FileObserver.CLOSE_WRITE){ // check if its a "create" and not equal to .probe because thats created every time camera is launched
+                    if (file.endsWith("intent")) {
+                        try {
+                            file = readFileAsString(Environment.getExternalStorageDirectory() + "/GNURoot/intents/" + file);
+                        } catch (IOException e) {
+                            return;
+                        }
+                        if (file.startsWith("/home")) {
+                            file = Environment.getExternalStorageDirectory() + "/GNURoot" + file;
+                        } else {
+                            //CCX need to fix this
+                            //file = Environment.getDataDirectory() + "/data/com.gnuroot.debian/debian/" + file;
+                            return;
+                        }
+                        Intent intent = new Intent(Intent.ACTION_EDIT);
+                        Uri uri = Uri.parse("file://"+file);
+                        intent.setDataAndType(uri, "text/plain");
+                        startActivity(intent);
+                    } else if (file.endsWith("png")) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        Uri uri = Uri.parse("file://"+Environment.getExternalStorageDirectory() + "/GNURoot/intents/" + file);
+                        intent.setDataAndType(uri, "image/png");
+                        startActivity(intent);
+                    }
+                }
+            }
+        };
+        mObserver.startWatching(); //START OBSERVING 
+
     }
+
+    private static String readFileAsString(String filePath) throws java.io.IOException
+    {
+        BufferedReader reader = new BufferedReader(new FileReader(filePath));
+        String line, results = "";
+        while( ( line = reader.readLine() ) != null)
+        {
+            results += line;
+        }
+        reader.close();
+        return results;
+    }
+    //CCX added the above function
 
     private String makePathFromBundle(Bundle extras) {
         if (extras == null || extras.size() == 0) {
@@ -719,6 +772,8 @@ public class Term extends Activity implements UpdateCallback, SharedPreferences.
         }
 
         try {
+            //CCX changed terms to start with intents
+            /*
             TermSession session = createTermSession();
 
             mTermSessions.add(session);
@@ -728,6 +783,11 @@ public class Term extends Activity implements UpdateCallback, SharedPreferences.
 
             mViewFlipper.addView(view);
             mViewFlipper.setDisplayedChild(mViewFlipper.getChildCount()-1);
+            */
+            
+            Intent newWindowIntent = new Intent("com.gnuroot.debian.NEW_WINDOW");
+            newWindowIntent.addCategory(Intent.CATEGORY_DEFAULT);
+            startActivity(newWindowIntent);
         } catch (IOException e) {
             Toast.makeText(this, "Failed to create a session", Toast.LENGTH_SHORT).show();
         }

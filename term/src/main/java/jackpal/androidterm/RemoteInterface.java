@@ -152,7 +152,8 @@ public class RemoteInterface extends Activity {
 
         String initialCommand = mSettings.getInitialCommand();
         if (iInitialCommand != null) {
-            if (initialCommand != null) {
+            //CCX added second part of condition (.equals("")...)
+            if ((initialCommand != null) && (initialCommand.equals("") == false)) {
                 initialCommand += "\r" + iInitialCommand;
             } else {
                 initialCommand = iInitialCommand;
