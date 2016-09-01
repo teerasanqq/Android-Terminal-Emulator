@@ -26,6 +26,9 @@ import jackpal.androidterm.util.TermSettings;
 import java.io.*;
 import java.util.ArrayList;
 
+//CCX
+import android.os.Environment;
+
 /**
  * A terminal session, controlling the process attached to the session (usually
  * a shell). It keeps track of process PID and destroys it's process group
@@ -124,7 +127,7 @@ public class ShellTermSession extends GenericTermSession {
         if((mInitialCommand != null) && (mInitialCommand.equals("") == false))
             mProcId = createSubprocess(mInitialCommand, env);
         else
-            mProcId = createSubprocess(Environment.getDataDirectory() + "/data/com.gnuroot.debian/app_install/support/busybox sh", evn);
+            mProcId = createSubprocess(Environment.getDataDirectory() + "/data/com.gnuroot.debian/app_install/support/busybox sh", env);
     }
 
     private String checkPath(String path) {

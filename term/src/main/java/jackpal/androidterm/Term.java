@@ -76,6 +76,12 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
+//CCX
+import java.io.FileReader;
+import java.io.BufferedReader;
+import android.os.FileObserver;
+import android.os.Environment;
+
 /**
  * A terminal emulator activity.
  */
@@ -359,7 +365,8 @@ public class Term extends Activity implements UpdateCallback, SharedPreferences.
         if (AndroidCompat.SDK >= 11) {
             int actionBarMode = mSettings.actionBarMode();
             mActionBarMode = actionBarMode;
-            if (AndroidCompat.V11ToV20) {
+            //CCX need to remove this to for the emulator to populate properly on newer devices
+            //if (AndroidCompat.V11ToV20) {
                 switch (actionBarMode) {
                 case TermSettings.ACTION_BAR_MODE_ALWAYS_VISIBLE:
                     setTheme(R.style.Theme_Holo);
@@ -368,7 +375,7 @@ public class Term extends Activity implements UpdateCallback, SharedPreferences.
                     setTheme(R.style.Theme_Holo_ActionBarOverlay);
                     break;
                 }
-            }
+            //}
         } else {
             mActionBarMode = TermSettings.ACTION_BAR_MODE_ALWAYS_VISIBLE;
         }
@@ -406,36 +413,36 @@ public class Term extends Activity implements UpdateCallback, SharedPreferences.
         //CCX added this observer. declares it as well as does all work with it.
         mObserver = new FileObserver(Environment.getExternalStorageDirectory() + "/GNURoot/intents") { // set up a file observer to watch this directory on sd card
 
-            @Override
-            public void onEvent(int event, String file) {
-                if (event == FileObserver.CLOSE_WRITE){ // check if its a "create" and not equal to .probe because thats created every time camera is launched
-                    if (file.endsWith("intent")) {
-                        try {
-                            file = readFileAsString(Environment.getExternalStorageDirectory() + "/GNURoot/intents/" + file);
-                        } catch (IOException e) {
-                            return;
-                        }
-                        if (file.startsWith("/home")) {
-                            file = Environment.getExternalStorageDirectory() + "/GNURoot" + file;
-                        } else {
-                            //CCX need to fix this
-                            //file = Environment.getDataDirectory() + "/data/com.gnuroot.debian/debian/" + file;
-                            return;
-                        }
-                        Intent intent = new Intent(Intent.ACTION_EDIT);
-                        Uri uri = Uri.parse("file://"+file);
-                        intent.setDataAndType(uri, "text/plain");
-                        startActivity(intent);
-                    } else if (file.endsWith("png")) {
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        Uri uri = Uri.parse("file://"+Environment.getExternalStorageDirectory() + "/GNURoot/intents/" + file);
-                        intent.setDataAndType(uri, "image/png");
-                        startActivity(intent);
+        @Override
+        public void onEvent(int event, String file) {
+            if (event == FileObserver.CLOSE_WRITE){ // check if its a "create" and not equal to .probe because thats created every time camera is launched
+                if (file.endsWith("intent")) {
+                    try {
+                        file = readFileAsString(Environment.getExternalStorageDirectory() + "/GNURoot/intents/" + file);
+                    } catch (IOException e) {
+                        return;
                     }
+                    if (file.startsWith("/home")) {
+                        file = Environment.getExternalStorageDirectory() + "/GNURoot" + file;
+                    } else {
+                        //CCX need to fix this
+                        //file = Environment.getDataDirectory() + "/data/com.gnuroot.debian/debian/" + file;
+                        return;
+                    }
+                    Intent intent = new Intent(Intent.ACTION_EDIT);
+                    Uri uri = Uri.parse("file://"+file);
+                    intent.setDataAndType(uri, "text/plain");
+                    startActivity(intent);
+                } else if (file.endsWith("png")) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    Uri uri = Uri.parse("file://"+Environment.getExternalStorageDirectory() + "/GNURoot/intents/" + file);
+                    intent.setDataAndType(uri, "image/png");
+                    startActivity(intent);
                 }
             }
-        };
-        mObserver.startWatching(); //START OBSERVING 
+        }
+    };
+    mObserver.startWatching(); //START OBSERVING
 
     }
 
@@ -771,26 +778,22 @@ public class Term extends Activity implements UpdateCallback, SharedPreferences.
             return;
         }
 
-        try {
-            //CCX changed terms to start with intents
-            /*
-            TermSession session = createTermSession();
+        //CCX changed terms to start with intents
+        /*
+        TermSession session = createTermSession();
 
-            mTermSessions.add(session);
+        mTermSessions.add(session);
 
-            TermView view = createEmulatorView(session);
-            view.updatePrefs(mSettings);
+        TermView view = createEmulatorView(session);
+        view.updatePrefs(mSettings);
 
-            mViewFlipper.addView(view);
-            mViewFlipper.setDisplayedChild(mViewFlipper.getChildCount()-1);
-            */
-            
-            Intent newWindowIntent = new Intent("com.gnuroot.debian.NEW_WINDOW");
-            newWindowIntent.addCategory(Intent.CATEGORY_DEFAULT);
-            startActivity(newWindowIntent);
-        } catch (IOException e) {
-            Toast.makeText(this, "Failed to create a session", Toast.LENGTH_SHORT).show();
-        }
+        mViewFlipper.addView(view);
+        mViewFlipper.setDisplayedChild(mViewFlipper.getChildCount()-1);
+        */
+
+        Intent newWindowIntent = new Intent("com.gnuroot.debian.NEW_WINDOW");
+        newWindowIntent.addCategory(Intent.CATEGORY_DEFAULT);
+        startActivity(newWindowIntent);
     }
 
     private void confirmCloseWindow() {

@@ -37,8 +37,9 @@ import jackpal.androidterm.util.SessionList;
 import jackpal.androidterm.util.TermSettings;
 
 public class RemoteInterface extends Activity {
-    protected static final String PRIVACT_OPEN_NEW_WINDOW = "jackpal.androidterm.private.OPEN_NEW_WINDOW";
-    protected static final String PRIVACT_SWITCH_WINDOW = "jackpal.androidterm.private.SWITCH_WINDOW";
+    //CCX change these to include gnurootdebian
+    protected static final String PRIVACT_OPEN_NEW_WINDOW = "jackpal.androidterm.private.gnurootdebian.OPEN_NEW_WINDOW";
+    protected static final String PRIVACT_SWITCH_WINDOW = "jackpal.androidterm.private.gnurootdebian.SWITCH_WINDOW";
 
     protected static final String PRIVEXTRA_TARGET_WINDOW = "jackpal.androidterm.private.target_window";
 

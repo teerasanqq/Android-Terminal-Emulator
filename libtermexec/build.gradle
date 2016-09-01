@@ -1,11 +1,3 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:1.0.0'
-    }
-}
 apply plugin: 'com.android.library'
 
 repositories {
@@ -54,6 +46,5 @@ android.libraryVariants.all { variant ->
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-
     compile 'com.android.support:support-annotations:21.0.0'
 }
