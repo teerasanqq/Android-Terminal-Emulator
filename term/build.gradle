@@ -11,7 +11,7 @@ android {
 
         ndk {
             moduleName "libjackpal-androidterm5"
-            abiFilters 'all' //CCX 'armeabi', 'mips', 'x86'
+            abiFilters 'armeabi', 'armeabi-v7a', 'x86' //CCX 'armeabi', 'mips', 'x86'
             ldLibs "log"
         }
     }

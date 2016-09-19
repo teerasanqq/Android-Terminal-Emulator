@@ -16,7 +16,7 @@ android {
 
         ndk {
             moduleName 'libjackpal-termexec2'
-            abiFilters 'all'
+            abiFilters 'armeabi', 'armeabi-v7a', 'x86'
             ldLibs 'log', 'c'
         }
     }
@@ -46,5 +46,5 @@ android.libraryVariants.all { variant ->
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:support-annotations:21.0.0'
+    compile 'com.android.support:support-annotations:22.0.0'
 }

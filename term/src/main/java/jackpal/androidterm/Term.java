@@ -410,39 +410,39 @@ public class Term extends Activity implements UpdateCallback, SharedPreferences.
         updatePrefs();
         mAlreadyStarted = true;
 
-        //CCX added this observer. declares it as well as does all work with it.
+        //CCX declared and defined this observer
         mObserver = new FileObserver(Environment.getExternalStorageDirectory() + "/GNURoot/intents") { // set up a file observer to watch this directory on sd card
 
-        @Override
-        public void onEvent(int event, String file) {
-            if (event == FileObserver.CLOSE_WRITE){ // check if its a "create" and not equal to .probe because thats created every time camera is launched
-                if (file.endsWith("intent")) {
-                    try {
-                        file = readFileAsString(Environment.getExternalStorageDirectory() + "/GNURoot/intents/" + file);
-                    } catch (IOException e) {
-                        return;
+            @Override
+            public void onEvent(int event, String file) {
+                if (event == FileObserver.CLOSE_WRITE){ // check if its a "create" and not equal to .probe because thats created every time camera is launched
+                    if (file.endsWith("intent")) {
+                        try {
+                            file = readFileAsString(Environment.getExternalStorageDirectory() + "/GNURoot/intents/" + file);
+                        } catch (IOException e) {
+                            return;
+                        }
+                        if (file.startsWith("/home")) {
+                            file = Environment.getExternalStorageDirectory() + "/GNURoot" + file;
+                        } else {
+                            //CCX need to fix this
+                            //file = Environment.getDataDirectory() + "/data/com.gnuroot.debian/debian/" + file;
+                            return;
+                        }
+                        Intent intent = new Intent(Intent.ACTION_EDIT);
+                        Uri uri = Uri.parse("file://"+file);
+                        intent.setDataAndType(uri, "text/plain");
+                        startActivity(intent);
+                    } else if (file.endsWith("png")) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        Uri uri = Uri.parse("file://"+Environment.getExternalStorageDirectory() + "/GNURoot/intents/" + file);
+                        intent.setDataAndType(uri, "image/png");
+                        startActivity(intent);
                     }
-                    if (file.startsWith("/home")) {
-                        file = Environment.getExternalStorageDirectory() + "/GNURoot" + file;
-                    } else {
-                        //CCX need to fix this
-                        //file = Environment.getDataDirectory() + "/data/com.gnuroot.debian/debian/" + file;
-                        return;
-                    }
-                    Intent intent = new Intent(Intent.ACTION_EDIT);
-                    Uri uri = Uri.parse("file://"+file);
-                    intent.setDataAndType(uri, "text/plain");
-                    startActivity(intent);
-                } else if (file.endsWith("png")) {
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    Uri uri = Uri.parse("file://"+Environment.getExternalStorageDirectory() + "/GNURoot/intents/" + file);
-                    intent.setDataAndType(uri, "image/png");
-                    startActivity(intent);
                 }
             }
-        }
-    };
-    mObserver.startWatching(); //START OBSERVING
+        };
+        mObserver.startWatching(); //START OBSERVING
 
     }
 
@@ -514,7 +514,9 @@ public class Term extends Activity implements UpdateCallback, SharedPreferences.
             updatePrefs();
 
             if (onResumeSelectWindow >= 0) {
-                mViewFlipper.setDisplayedChild(onResumeSelectWindow);
+                //CCX changed this back to the old value from onResumeSelectWindow, which is
+                //Integer.MAX in cases of new windows
+                mViewFlipper.setDisplayedChild(mTermSessions.size()-1);
                 onResumeSelectWindow = -1;
             }
             mViewFlipper.onResume();
@@ -729,8 +731,9 @@ public class Term extends Activity implements UpdateCallback, SharedPreferences.
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
+        MenuItemCompat.setShowAsAction(menu.findItem(R.id.xterm), MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
         MenuItemCompat.setShowAsAction(menu.findItem(R.id.menu_new_window), MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
-        MenuItemCompat.setShowAsAction(menu.findItem(R.id.menu_close_window), MenuItemCompat.SHOW_AS_ACTION_IF_ROOM);
+        MenuItemCompat.setShowAsAction(menu.findItem(R.id.menu_close_window), MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
         return true;
     }
 
@@ -739,6 +742,10 @@ public class Term extends Activity implements UpdateCallback, SharedPreferences.
         int id = item.getItemId();
         if (id == R.id.menu_preferences) {
             doPreferences();
+        } else if (id == R.id.xterm) {
+            doCreateXterm(); //CCX
+        } else if (id == R.id.menu_gnuroot_reinstall) {
+            doGNURootReinstall(); //CCX
         } else if (id == R.id.menu_new_window) {
             doCreateNewWindow();
         } else if (id == R.id.menu_close_window) {
@@ -772,28 +779,45 @@ public class Term extends Activity implements UpdateCallback, SharedPreferences.
         return super.onOptionsItemSelected(item);
     }
 
+    private void doCreateXterm() {
+        Intent newXtermIntent = new Intent("com.gnuroot.debian.NEW_XTERM");
+        newXtermIntent.addCategory(Intent.CATEGORY_DEFAULT);
+        startActivity(newXtermIntent);
+    }
+
+    private void doGNURootReinstall() {
+        Intent gnuRootReinstall = new Intent("com.gnuroot.debian.GNUROOT_REINSTALL");
+        gnuRootReinstall.addCategory(Intent.CATEGORY_DEFAULT);
+        startActivity(gnuRootReinstall);
+    }
+
     private void doCreateNewWindow() {
         if (mTermSessions == null) {
             Log.w(TermDebug.LOG_TAG, "Couldn't create new window because mTermSessions == null");
             return;
         }
 
-        //CCX changed terms to start with intents
+        //CCX create an intent to use launchTerm() in GNURoot
         /*
-        TermSession session = createTermSession();
+        try {
+            TermSession session = createTermSession();
 
-        mTermSessions.add(session);
+            mTermSessions.add(session);
 
-        TermView view = createEmulatorView(session);
-        view.updatePrefs(mSettings);
+            TermView view = createEmulatorView(session);
+            view.updatePrefs(mSettings);
 
-        mViewFlipper.addView(view);
-        mViewFlipper.setDisplayedChild(mViewFlipper.getChildCount()-1);
+            mViewFlipper.addView(view);
+            mViewFlipper.setDisplayedChild(mViewFlipper.getChildCount()-1);
+        } catch (IOException e) {
+            Toast.makeText(this, "Failed to create a session", Toast.LENGTH_SHORT).show();
+        }
         */
 
         Intent newWindowIntent = new Intent("com.gnuroot.debian.NEW_WINDOW");
         newWindowIntent.addCategory(Intent.CATEGORY_DEFAULT);
         startActivity(newWindowIntent);
+
     }
 
     private void confirmCloseWindow() {
