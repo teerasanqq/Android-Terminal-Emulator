@@ -410,7 +410,7 @@ public class Term extends Activity implements UpdateCallback, SharedPreferences.
         updatePrefs();
         mAlreadyStarted = true;
 
-        //CCX declared and defined this observer
+        //CCX declared and defined this observer and the runnable needed for toast
         mObserver = new FileObserver(Environment.getExternalStorageDirectory() + "/GNURoot/intents") { // set up a file observer to watch this directory on sd card
 
             @Override
@@ -438,7 +438,19 @@ public class Term extends Activity implements UpdateCallback, SharedPreferences.
                         Uri uri = Uri.parse("file://"+Environment.getExternalStorageDirectory() + "/GNURoot/intents/" + file);
                         intent.setDataAndType(uri, "image/png");
                         startActivity(intent);
-                    }
+                    } /*TODO use file observer to make toasts based on intents directory
+                    else if (file.endsWith("alarm")) {
+                        Intent toastIntent = new Intent("com.gnuroot.debian.TOAST_ALARM");
+                        toastIntent.addCategory(Intent.CATEGORY_DEFAULT);
+                        String sub = "An unknown command is being applied to GNUroot";
+                        int separator = file.indexOf(".");
+                        if(separator != -1)
+                            sub = file.substring(0, separator);
+                        Toast.makeText(getBaseContext(), sub + "... Please wait for completetion.", Toast.LENGTH_LONG).show();
+                        toastIntent.putExtra("alarmName", sub);
+
+                        startActivity(toastIntent);
+                    } */
                 }
             }
         };
@@ -786,9 +798,27 @@ public class Term extends Activity implements UpdateCallback, SharedPreferences.
     }
 
     private void doGNURootReinstall() {
-        Intent gnuRootReinstall = new Intent("com.gnuroot.debian.GNUROOT_REINSTALL");
-        gnuRootReinstall.addCategory(Intent.CATEGORY_DEFAULT);
-        startActivity(gnuRootReinstall);
+        final AlertDialog.Builder b = new AlertDialog.Builder(this);
+        b.setIcon(android.R.drawable.ic_dialog_alert);
+        b.setMessage("Are you sure you would like to reinstall GNURoot? This will" +
+                " delete all files not stored on the sdcard or in the home directory.");
+        final Runnable closeWindow = new Runnable() {
+            public void run() {
+                doCloseWindow();
+                Intent gnuRootReinstall = new Intent("com.gnuroot.debian.GNUROOT_REINSTALL");
+                gnuRootReinstall.addCategory(Intent.CATEGORY_DEFAULT);
+                startActivity(gnuRootReinstall);
+            }
+        };
+        b.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+                mHandler.post(closeWindow);
+            }
+        });
+        b.setNegativeButton(android.R.string.no, null);
+        b.show();
+
     }
 
     private void doCreateNewWindow() {
