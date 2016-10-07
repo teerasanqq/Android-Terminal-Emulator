@@ -792,8 +792,10 @@ public class Term extends Activity implements UpdateCallback, SharedPreferences.
     }
 
     private void doCreateXterm() {
-        Intent newXtermIntent = new Intent("com.gnuroot.debian.NEW_XTERM");
+        Intent newXtermIntent = new Intent("com.gnuroot.debian.LAUNCH");
         newXtermIntent.addCategory(Intent.CATEGORY_DEFAULT);
+        newXtermIntent.putExtra("launchType", "launchXTerm");
+        newXtermIntent.putExtra("terminal_button", true);
         startActivity(newXtermIntent);
     }
 
@@ -844,8 +846,9 @@ public class Term extends Activity implements UpdateCallback, SharedPreferences.
         }
         */
 
-        Intent newWindowIntent = new Intent("com.gnuroot.debian.NEW_WINDOW");
+        Intent newWindowIntent = new Intent("com.gnuroot.debian.LAUNCH");
         newWindowIntent.addCategory(Intent.CATEGORY_DEFAULT);
+        newWindowIntent.putExtra("launchType", "launchTerm");
         startActivity(newWindowIntent);
 
     }
