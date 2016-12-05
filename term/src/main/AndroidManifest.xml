@@ -36,11 +36,13 @@
                 android:launchMode="singleTask"
                 android:configChanges="keyboard|keyboardHidden|orientation"
                 android:windowSoftInputMode="adjustResize|stateAlwaysVisible">
+<!-- CCX don't want a second launcher icon
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.MULTIWINDOW_LAUNCHER" />
             </intent-filter>
+-->
         </activity>
         <activity-alias android:name="TermInternal"
                 android:targetActivity="Term"
