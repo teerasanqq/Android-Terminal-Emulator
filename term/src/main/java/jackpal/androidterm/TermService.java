@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (C) 2017 Google 
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,9 +87,6 @@ public class TermService extends Service implements TermSession.FinishCallback
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         SharedPreferences.Editor editor = prefs.edit();
         String defValue = getDir("HOME", MODE_PRIVATE).getAbsolutePath();
-        String homePath = prefs.getString("home_path", defValue);
-        editor.putString("home_path", homePath);
-        editor.commit();
 
         compat = new ServiceForegroundCompat(this);
         mTermSessions = new SessionList();
