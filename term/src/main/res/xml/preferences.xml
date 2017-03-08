@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (C) 2008 The Android Open Source Project
+     Copyright (C) 2017 Google
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -155,18 +156,6 @@
     <PreferenceCategory
         android:title="@string/shell_preferences">
 
-    <EditTextPreference
-            android:key="shell"
-            android:defaultValue="@string/pref_shell_default"
-            android:title="@string/title_shell_preference"
-            android:summary="@string/summary_shell_preference"
-            android:dialogTitle="@string/dialog_title_shell_preference" />
-    <EditTextPreference
-            android:key="initialcommand"
-            android:defaultValue="@string/pref_initialcommand_default"
-            android:title="@string/title_initialcommand_preference"
-            android:summary="@string/summary_initialcommand_preference"
-            android:dialogTitle="@string/dialog_title_initialcommand_preference" />
     <ListPreference
             android:key="termtype"
             android:defaultValue="@string/pref_termtype_default"
@@ -200,10 +189,5 @@
             android:defaultValue="@bool/pref_allow_prepend_path_default"
             android:title="@string/title_allow_prepend_path_preference"
             android:summary="@string/summary_allow_prepend_path_preference" />
-    <!-- the home_path default is set dynamically in Term.onResume() -->
-    <EditTextPreference
-            android:key="home_path"
-            android:title="@string/title_home_path_preference"
-            android:summary="@string/summary_home_path_preference" />
     </PreferenceCategory>
 </PreferenceScreen>
